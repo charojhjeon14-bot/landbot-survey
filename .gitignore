@@ -1,0 +1,6 @@
+node_modules
+.vercel
+data/responses.json
+tunnel.log
+survey_qr.png
+*.log

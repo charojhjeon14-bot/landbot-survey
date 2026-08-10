@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LAND-BOT 설문 분석 대시보드</title>
+<style>
+  :root{ --navy:#1f3864; --blue:#2e5c9a; --lblue:#eef3fa; --line:#dbe2ee; --green:#2c6e49; --red:#c00000; --gray:#6a7280; }
+  *{ box-sizing:border-box; }
+  body{ margin:0; font-family:'Malgun Gothic','맑은 고딕',sans-serif; background:#eef1f6; color:#1f2733; }
+  header{ background:var(--navy); color:#fff; padding:16px 22px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  header h1{ margin:0; font-size:18px; }
+  header .meta{ font-size:12.5px; opacity:.85; }
+  header .act{ display:flex; gap:8px; }
+  header button, header a{ background:rgba(255,255,255,.15); color:#fff; border:1px solid rgba(255,255,255,.3);
+    border-radius:8px; padding:7px 12px; font-size:13px; cursor:pointer; text-decoration:none; }
+  .wrap{ max-width:1080px; margin:0 auto; padding:18px 16px 60px; }
+  .kpis{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:8px; }
+  .kpi{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; text-align:center; }
+  .kpi .v{ font-size:30px; font-weight:800; color:var(--navy); line-height:1.1; }
+  .kpi .v small{ font-size:15px; font-weight:700; color:var(--gray); }
+  .kpi .l{ font-size:12.5px; color:var(--gray); margin-top:6px; }
+  .kpi.hot .v{ color:var(--red); }
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+  @media(max-width:760px){ .grid{ grid-template-columns:1fr; } }
+  .card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; }
+  .card h2{ margin:0 0 14px; font-size:15px; color:var(--navy); }
+  .row{ display:flex; align-items:center; gap:10px; margin:9px 0; font-size:13.5px; }
+  .row .name{ width:130px; flex:none; color:#333; }
+  .row .bar{ flex:1; background:#eef1f6; border-radius:6px; height:20px; overflow:hidden; }
+  .row .bar > i{ display:block; height:100%; background:var(--blue); border-radius:6px; transition:width .5s; }
+  .row .val{ width:64px; flex:none; text-align:right; font-weight:700; color:var(--navy); font-variant-numeric:tabular-nums; }
+  .row.green .bar > i{ background:var(--green); }
+  .row.hot .bar > i{ background:var(--red); }
+  .muted{ color:var(--gray); font-size:12.5px; }
+  .etc{ background:#f7f9fc; border-left:3px solid var(--blue); padding:8px 12px; margin:6px 0; border-radius:0 6px 6px 0; font-size:13px; }
+  .jtag{ display:inline-block; background:var(--navy); color:#fff; font-size:11px; font-weight:700; padding:1px 7px; border-radius:10px; margin-right:6px; vertical-align:1px; }
+  .login{ max-width:360px; margin:80px auto; background:#fff; border:1px solid var(--line); border-radius:14px; padding:28px; text-align:center; }
+  .login input{ width:100%; padding:12px; border:1.5px solid var(--line); border-radius:10px; font-size:15px; margin:14px 0; }
+  .login button{ width:100%; padding:13px; background:var(--navy); color:#fff; border:0; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; }
+  .empty{ text-align:center; color:var(--gray); padding:50px; }
+  .note{ font-size:12px; color:#9aa3af; margin-top:4px; }
+  .back{ display:inline-block; margin-top:14px; font-size:12.5px; color:var(--blue); text-decoration:none; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const urlKey = new URLSearchParams(location.search).get('key');
+let KEY = urlKey || localStorage.getItem('lb_admin_key') || '';
+if(urlKey) localStorage.setItem('lb_admin_key', urlKey);
+
+function bar(name, pct, val, cls=''){
+  return `<div class="row ${cls}"><div class="name">${name}</div><div class="bar"><i style="width:${Math.max(0,Math.min(100,pct))}%"></i></div><div class="val">${val}</div></div>`;
+}
+function scaleBar(label, avg){
+  const pct = avg==null?0:(avg/5*100);
+  return bar(label, pct, avg==null?'-':avg.toFixed(2), 'green');
+}
+
+async function load(){
+  const app = document.getElementById('app');
+  if(!KEY){ return renderLogin(''); }
+  let d;
+  try{
+    const r = await fetch('/api/stats?key='+encodeURIComponent(KEY));
+    if(r.status===401){ localStorage.removeItem('lb_admin_key'); KEY=''; return renderLogin('비밀번호가 올바르지 않습니다.'); }
+    d = await r.json();
+  }catch(e){ app.innerHTML='<p class="empty">서버 연결 오류</p>'; return; }
+  render(d);
+}
+
+function renderLogin(msg){
+  document.getElementById('app').innerHTML = `
+    <div class="login">
+      <h2 style="color:#1f3864;margin:0">🔒 분석 대시보드</h2>
+      <p class="muted">관리자 비밀번호를 입력하세요</p>
+      <input id="k" type="password" placeholder="비밀번호" autofocus>
+      <button onclick="(function(){KEY=document.getElementById('k').value;localStorage.setItem('lb_admin_key',KEY);load();})()">접속</button>
+      <p style="color:#c00000;font-size:13px;height:16px">${msg||''}</p>
+      <a class="back" href="/">← 설문지로 돌아가기</a>
+    </div>`;
+  const k = document.getElementById('k');
+  if(k) k.addEventListener('keydown',e=>{ if(e.key==='Enter'){ KEY=k.value; localStorage.setItem('lb_admin_key',KEY); load(); }});
+}
+
+function render(d){
+  const jisaNames = ['전주','부안','논산','무주','진안','보령'];
+  const s = d.satisfaction, e = d.efficiency;
+  const app = document.getElementById('app');
+
+  let head = `<header>
+    <div><h1>「LAND-BOT」 설문 분석 대시보드</h1>
+    <div class="meta">최종 갱신 ${new Date(d.updated).toLocaleString('ko-KR')}</div></div>
+    <div class="act">
+      <button onclick="load()">↻ 새로고침</button>
+      <a href="/api/export.csv?key=${encodeURIComponent(KEY)}">⬇ CSV 내보내기</a>
+      <a href="/">📝 설문지</a>
+      <button onclick="localStorage.removeItem('lb_admin_key');location.reload()">로그아웃</button>
+    </div></header>`;
+
+  if(d.n===0){
+    app.innerHTML = head + '<div class="wrap"><div class="empty">아직 응답이 없습니다.<br>설문 링크를 배포한 뒤 응답이 들어오면 이곳에 집계됩니다.</div></div>';
+    return;
+  }
+
+  const kpis = `<div class="kpis">
+    <div class="kpi hot"><div class="v">${d.n}<small>명</small></div><div class="l">총 응답자 수</div></div>
+    <div class="kpi"><div class="v">${s.part1??'-'}<small>/5</small></div><div class="l">종합 만족도 ★</div></div>
+    <div class="kpi"><div class="v">${e.q5??'-'}<small>%</small></div><div class="l">조사시간 평균 단축 ★</div></div>
+    <div class="kpi"><div class="v">${e.q6??'-'}<small>%</small></div><div class="l">민원시간 평균 단축 ★</div></div>
+    <div class="kpi"><div class="v">${e.q7up??'-'}<small>%</small></div><div class="l">'1회 방문 종결' 증가 응답</div></div>
+  </div>`;
+
+  const satis = `<div class="card"><h2>Part 1. 전반 만족도 (5점 만점)</h2>
+    ${s.items.map(i=>scaleBar(i.label, i.avg)).join('')}
+    <p class="note">★ 보고서 대표 만족도 = 종합 ${s.part1??'-'}점</p></div>`;
+
+  const feat = `<div class="card"><h2>Part 3. 기능별 도움 정도 (응답한 사람 기준)</h2>
+    ${d.features.map(i=>scaleBar(i.label, i.avg)).join('')}</div>`;
+
+  const rel = `<div class="card"><h2>Part 4. 신뢰성 (5점 만점)</h2>
+    ${d.reliability.map(i=>scaleBar(i.label, i.avg)).join('')}
+    <p class="note">Ⅴ 안전성·윤리성 항목 근거</p></div>`;
+
+  const q15 = `<div class="card"><h2>Part 5. 도입 후 가장 큰 변화 (분포)</h2>
+    ${d.q15.map(i=>bar(i.label, i.pct, i.count+'명 ('+i.pct+'%)')).join('')}</div>`;
+
+  const jisa = `<div class="card"><h2>지사별 응답 현황</h2>
+    ${d.jisa.map(i=>bar(jisaNames[i.code-1]+'지사', i.pct, i.count+'명 ('+i.pct+'%)')).join('')}</div>`;
+
+  const a3 = `<div class="card"><h2>주 사용 기능 (복수응답)</h2>
+    ${d.a3.map(i=>bar(i.label, i.pct, i.count+'명 ('+i.pct+'%)')).join('')}</div>`;
+
+  const esc = t => String(t).replace(/</g,'&lt;');
+  const jTag = code => `<span class="jtag">${jisaNames[code-1]||'?'}지사</span>`;
+  function commentCard(title, arr, accent){
+    if(!arr || !arr.length) return '';
+    return `<div class="card" style="grid-column:1/-1;border-left:4px solid ${accent}">
+      <h2>${title} <span style="color:#9aa3af;font-weight:400">(${arr.length}건)</span></h2>
+      ${arr.map(c=>`<div class="etc" style="border-left-color:${accent}">${jTag(c.jisa)} ${esc(c.text)}</div>`).join('')}</div>`;
+  }
+  const cm = d.comments || {improve:[],good:[],free:[]};
+  const etcBlock = d.etcs.length ? `<div class="card" style="grid-column:1/-1"><h2>Q15 '기타' 응답 <span style="color:#9aa3af;font-weight:400">(${d.etcs.length}건)</span></h2>
+    ${d.etcs.map(t=>'<div class="etc">'+esc(t)+'</div>').join('')}</div>` : '';
+
+  const qual = commentCard('🛠 개선·건의 사항', cm.improve, '#c00000')
+             + commentCard('👍 좋았던 점·유용했던 점 — 보고서 인용 후보', cm.good, '#2c6e49')
+             + commentCard('💬 그 밖의 의견', cm.free, '#2e5c9a')
+             + etcBlock;
+
+  app.innerHTML = head + `<div class="wrap">${kpis}
+    <div class="grid">${satis}${q15}${feat}${jisa}${rel}${a3}</div>
+    ${qual || '<p class="note" style="text-align:center;margin-top:20px">아직 서술형 의견이 없습니다.</p>'}</div>`;
+}
+
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "landbot-survey",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LAND-BOT 사용자 만족도 설문 - 수집 및 분석",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "@upstash/redis": "^1.34.3"
+  }
+}
