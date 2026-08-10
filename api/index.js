@@ -92,6 +92,12 @@ function auth(req, res, next) {
 function avg(nums) { const a = nums.filter(n => typeof n === 'number'); return a.length ? a.reduce((x, y) => x + y, 0) / a.length : null; }
 function round(n, d = 2) { return n == null ? null : Math.round(n * 10 ** d) / 10 ** d; }
 
+// ── 데이터 초기화 (관리자 전용) ──
+app.post('/api/reset', auth, async (req, res) => {
+  await storage.resetAll();
+  res.json({ ok: true });
+});
+
 app.get('/api/stats', auth, async (req, res) => {
   const all = await storage.loadAll();
   const n = all.length;

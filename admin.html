@@ -59,6 +59,14 @@ function scaleBar(label, avg){
   return bar(label, pct, avg==null?'-':avg.toFixed(2), 'green');
 }
 
+async function resetData(){
+  if(!confirm('정말 모든 응답 데이터를 초기화할까요?\n이 작업은 되돌릴 수 없습니다.')) return;
+  const r = await fetch('/api/reset?key='+encodeURIComponent(KEY), { method:'POST' });
+  const j = await r.json();
+  if(j.ok){ alert('초기화되었습니다.'); load(); }
+  else alert('초기화 실패: '+(j.msg||''));
+}
+
 async function load(){
   const app = document.getElementById('app');
   if(!KEY){ return renderLogin(''); }
@@ -97,6 +105,7 @@ function render(d){
       <button onclick="load()">↻ 새로고침</button>
       <a href="/api/export.csv?key=${encodeURIComponent(KEY)}">⬇ CSV 내보내기</a>
       <a href="/">📝 설문지</a>
+      <button onclick="resetData()" style="background:rgba(192,0,0,.35);border-color:rgba(255,255,255,.3)">🗑 초기화</button>
       <button onclick="localStorage.removeItem('lb_admin_key');location.reload()">로그아웃</button>
     </div></header>`;
 
