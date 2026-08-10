@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LAND-BOT 설문 분석 대시보드</title>
 <style>
-  :root{ --navy:#1f3864; --blue:#2e5c9a; --lblue:#eef3fa; --line:#dbe2ee; --green:#2c6e49; --red:#c00000; --gray:#6a7280; }
+  :root{ --navy:#1a3fd6; --blue:#3b6fed; --lblue:#eaf1ff; --line:#cddcfb; --green:#16a34a; --red:#dc2626; --gray:#6a7280; }
   *{ box-sizing:border-box; }
   body{ margin:0; font-family:'Malgun Gothic','맑은 고딕',sans-serif; background:#eef1f6; color:#1f2733; }
   header{ background:var(--navy); color:#fff; padding:16px 22px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; }
@@ -82,11 +82,11 @@ async function load(){
 function renderLogin(msg){
   document.getElementById('app').innerHTML = `
     <div class="login">
-      <h2 style="color:#1f3864;margin:0">🔒 분석 대시보드</h2>
+      <h2 style="color:#1a3fd6;margin:0">🔒 분석 대시보드</h2>
       <p class="muted">관리자 비밀번호를 입력하세요</p>
       <input id="k" type="password" placeholder="비밀번호" autofocus>
       <button onclick="(function(){KEY=document.getElementById('k').value;localStorage.setItem('lb_admin_key',KEY);load();})()">접속</button>
-      <p style="color:#c00000;font-size:13px;height:16px">${msg||''}</p>
+      <p style="color:#dc2626;font-size:13px;height:16px">${msg||''}</p>
       <a class="back" href="/">← 설문지로 돌아가기</a>
     </div>`;
   const k = document.getElementById('k');
@@ -105,7 +105,7 @@ function render(d){
       <button onclick="load()">↻ 새로고침</button>
       <a href="/api/export.csv?key=${encodeURIComponent(KEY)}">⬇ CSV 내보내기</a>
       <a href="/">📝 설문지</a>
-      <button onclick="resetData()" style="background:rgba(192,0,0,.35);border-color:rgba(255,255,255,.3)">🗑 초기화</button>
+      <button onclick="resetData()" style="background:rgba(220,38,38,.4);border-color:rgba(255,255,255,.3)">🗑 초기화</button>
       <button onclick="localStorage.removeItem('lb_admin_key');location.reload()">로그아웃</button>
     </div></header>`;
 
@@ -154,9 +154,9 @@ function render(d){
   const etcBlock = d.etcs.length ? `<div class="card" style="grid-column:1/-1"><h2>Q15 '기타' 응답 <span style="color:#9aa3af;font-weight:400">(${d.etcs.length}건)</span></h2>
     ${d.etcs.map(t=>'<div class="etc">'+esc(t)+'</div>').join('')}</div>` : '';
 
-  const qual = commentCard('🛠 개선·건의 사항', cm.improve, '#c00000')
-             + commentCard('👍 좋았던 점·유용했던 점 — 보고서 인용 후보', cm.good, '#2c6e49')
-             + commentCard('💬 그 밖의 의견', cm.free, '#2e5c9a')
+  const qual = commentCard('🛠 개선·건의 사항', cm.improve, '#dc2626')
+             + commentCard('👍 좋았던 점·유용했던 점 — 보고서 인용 후보', cm.good, '#16a34a')
+             + commentCard('💬 그 밖의 의견', cm.free, '#3b6fed')
              + etcBlock;
 
   app.innerHTML = head + `<div class="wrap">${kpis}
