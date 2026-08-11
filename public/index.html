@@ -22,6 +22,10 @@
   *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   body{ margin:0; font-family:'Malgun Gothic','맑은 고딕',sans-serif; background:#f4f6fa; color:#222; line-height:1.5; }
   .wrap{ max-width:640px; margin:0 auto; padding:0 14px 60px; }
+
+  /* 상단 고정 영역 (헤더+탭바+진행바) — 스크롤해도 화면에 붙어있음 */
+  .topbar{ position:sticky; top:0; z-index:20; box-shadow:0 2px 8px rgba(0,0,0,.08); }
+
   header{ background:var(--navy); color:#fff; padding:22px 16px 14px; text-align:center; }
   header h1{ margin:0 0 4px; font-size:20px; }
   header p{ margin:0; font-size:13px; opacity:.85; }
@@ -32,7 +36,7 @@
     font-size:14px; font-weight:700; padding:12px 8px; cursor:pointer; border-bottom:3px solid transparent; }
   .tabbar button.active{ color:#fff; border-bottom-color:#7aa0ff; background:rgba(255,255,255,.08); }
 
-  .prog{ position:sticky; top:0; z-index:5; height:6px; background:#dfe5ef; }
+  .prog{ height:6px; background:#dfe5ef; }
   .prog > i{ display:block; height:100%; width:0; background:var(--blue); transition:width .3s; }
   .card{ background:#fff; border:1px solid var(--line); border-radius:12px; padding:16px; margin:16px 0; box-shadow:0 1px 3px rgba(0,0,0,.04); }
   .sec{ font-size:13px; font-weight:700; color:var(--blue); margin:0 0 2px; }
@@ -84,15 +88,17 @@
 </style>
 </head>
 <body>
-<header>
-  <h1>「LAND-BOT」 사용자 만족도 설문</h1>
-  <p>유휴지 현장관리 앱 운영성과 점검 · 약 3분</p>
-</header>
-<div class="tabbar">
-  <button type="button" id="tabSurvey" class="active">📝 설문조사</button>
-  <button type="button" id="tabAdmin">🔒 관리자</button>
+<div class="topbar">
+  <header>
+    <h1>「LAND-BOT」 사용자 만족도 설문</h1>
+    <p>유휴지 현장관리 앱 운영성과 점검 · 약 3분</p>
+  </header>
+  <div class="tabbar">
+    <button type="button" id="tabSurvey" class="active">📝 설문조사</button>
+    <button type="button" id="tabAdmin">🔒 관리자</button>
+  </div>
+  <div class="prog"><i id="prog"></i></div>
 </div>
-<div class="prog"><i id="prog"></i></div>
 
 <div class="wrap">
   <form id="f">

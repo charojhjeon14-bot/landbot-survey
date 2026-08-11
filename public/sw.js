@@ -1,7 +1,7 @@
 // LAND-BOT 설문 PWA 서비스워커
 // 정적 자산(설문 화면 껍데기)만 캐싱 — /api/*, /admin은 항상 네트워크로 (오래된 데이터 방지)
 // 내용을 바꿔 재배포할 때는 아래 CACHE 이름의 버전 숫자를 올려주세요.
-const CACHE = 'landbot-survey-v1';
+const CACHE = 'landbot-survey-v2';
 const SHELL = ['/', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
