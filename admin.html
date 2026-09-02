@@ -44,6 +44,12 @@
   .empty{ text-align:center; color:var(--gray); padding:50px; }
   .note{ font-size:12px; color:#9aa3af; margin-top:4px; }
   .back{ display:inline-block; margin-top:14px; font-size:12.5px; color:var(--blue); text-decoration:none; }
+  .imgcard img{ display:block; width:100%; max-width:920px; height:auto; margin:0 auto; }
+  .imgcard .pies{ display:flex; flex-wrap:wrap; gap:16px; justify-content:center; }
+  .imgcard .pies figure{ margin:0; flex:1 1 230px; max-width:320px; text-align:center; }
+  .imgcard .pies figure img{ width:100%; max-width:none; }
+  .imgcard .pies figcaption{ font-size:13px; color:var(--gray); margin-top:6px; font-weight:700; }
+  .snapnote{ font-size:12px; color:#9aa3af; margin:0 0 12px; }
 </style>
 </head>
 <body>
@@ -125,19 +131,29 @@ function render(d){
     <div class="kpi"><div class="v">${e.q7up??'-'}<small>%</small></div><div class="l">'1회 방문 종결' 증가 응답</div></div>
   </div>`;
 
-  const satis = `<div class="card"><h2>Part 1. 전반 만족도 (5점 만점)</h2>
-    ${s.items.map(i=>scaleBar(i.label, i.avg)).join('')}
-    <p class="note">★ 보고서 대표 만족도 = 종합 ${s.part1??'-'}점</p></div>`;
-
-  const feat = `<div class="card"><h2>Part 3. 기능별 도움 정도 (응답한 사람 기준)</h2>
-    ${d.features.map(i=>scaleBar(i.label, i.avg)).join('')}</div>`;
-
-  const rel = `<div class="card"><h2>Part 4. 신뢰성 (5점 만점)</h2>
-    ${d.reliability.map(i=>scaleBar(i.label, i.avg)).join('')}
-    <p class="note">Ⅴ 안전성·윤리성 항목 근거</p></div>`;
-
-  const q15 = `<div class="card"><h2>Part 5. 도입 후 가장 큰 변화 (분포)</h2>
-    ${d.q15.map(i=>bar(i.label, i.pct, i.count+'명 ('+i.pct+'%)')).join('')}</div>`;
+  // ── 파트별 분석 차트: 사전 생성한 이미지로 대체 (n=24 응답 기준 스냅샷) ──
+  const CV = '?v=20260902';
+  const charts = `
+    <div class="card imgcard" style="grid-column:1/-1">
+      <h2>응답자 구성</h2>
+      <p class="snapnote">소속·업무분장 인원은 본부 제공 집계치, 업무 연차는 설문 응답(A2) 기준</p>
+      <div class="pies">
+        <figure><img src="/charts/pie-affiliation.png${CV}" alt="소속별"><figcaption>소속별</figcaption></figure>
+        <figure><img src="/charts/pie-jobtype.png${CV}" alt="업무분장"><figcaption>업무분장</figcaption></figure>
+        <figure><img src="/charts/pie-tenure.png${CV}" alt="업무 연차"><figcaption>업무 연차</figcaption></figure>
+      </div>
+    </div>
+    <div class="card imgcard" style="grid-column:1/-1"><h2>Part 1. 전반 만족도</h2>
+      <img src="/charts/bar-part1.png${CV}" alt="Part 1. 전반 만족도">
+      <p class="note">★ 보고서 대표 만족도 = 종합 ${s.part1??'-'}점</p></div>
+    <div class="card imgcard" style="grid-column:1/-1"><h2>Part 2. 업무 효율</h2>
+      <img src="/charts/bar-part2.png${CV}" alt="Part 2. 업무 효율"></div>
+    <div class="card imgcard" style="grid-column:1/-1"><h2>Part 3. 기능별 도움 정도</h2>
+      <img src="/charts/bar-part3.png${CV}" alt="Part 3. 기능별 도움 정도"></div>
+    <div class="card imgcard" style="grid-column:1/-1"><h2>Part 4. 신뢰성</h2>
+      <img src="/charts/bar-part4.png${CV}" alt="Part 4. 신뢰성"></div>
+    <div class="card imgcard" style="grid-column:1/-1"><h2>Part 5. 도입 후 가장 큰 변화</h2>
+      <img src="/charts/bar-part5.png${CV}" alt="Part 5. 도입 후 가장 큰 변화"></div>`;
 
   const jisa = `<div class="card"><h2>지사별 응답 현황</h2>
     ${d.jisa.map(i=>bar(jisaNames[i.code-1]+'지사', i.pct, i.count+'명 ('+i.pct+'%)')).join('')}</div>`;
@@ -163,7 +179,7 @@ function render(d){
              + etcBlock;
 
   app.innerHTML = head + `<div class="wrap">${kpis}
-    <div class="grid">${satis}${q15}${feat}${jisa}${rel}${a3}</div>
+    <div class="grid">${charts}${jisa}${a3}</div>
     ${qual || '<p class="note" style="text-align:center;margin-top:20px">아직 서술형 의견이 없습니다.</p>'}</div>`;
 }
 
